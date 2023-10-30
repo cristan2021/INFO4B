@@ -1,0 +1,105 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package MoteurRecherche;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+
+/**
+ *
+ * @author Guillaume Gauguet
+ */
+public class Page {
+    private String html="http://corndog.io/";
+    private ArrayList<String> mots = new ArrayList<String>();
+    private ArrayList<String> liens = new ArrayList<String>();
+    private String texte;
+
+    public Page(String html) 
+    {
+        this.html = html;
+        this.contenu();
+    }
+    
+    public void setHtml(String html) 
+    {
+        this.html = html;
+    }
+    
+    private void contenu()
+    {
+        String mot="mot";
+        String lien="lien";
+        Document doc=this.request(this.html);
+        for(Element link : doc.select("a[href]"))
+        {
+            mot=link.text();
+            lien= link.absUrl("href");
+            this.setRef(mot, lien);
+        }
+        this.texte="";
+        this.texte+=doc.title();
+        this.ajout(doc, "h1");
+        this.ajout(doc, "h2");
+        this.ajout(doc, "h3");
+        this.ajout(doc, "h4");
+        this.ajout(doc, "h5");
+        this.ajout(doc, "h6");
+        this.ajout(doc, "p");
+        this.ajout(doc, "li");
+    }
+    
+    private void ajout(Document doc,String tag){
+        for(Element x : doc.select(tag))
+        {
+            this.texte+="|";
+            this.texte+=x.text();
+        }
+    }
+    
+    public String getHtml() 
+    {
+        return html;
+    }
+
+    public ArrayList<String> getMots() 
+    {
+        return mots;
+    }
+
+    public ArrayList<String> getLiens() 
+    {
+        return liens;
+    }
+
+    
+    
+    private void setRef(String mot,String lien) 
+    {
+        this.mots.add(mot);
+        this.liens.add(lien);
+    }
+
+    private  Document request(String url)
+    {
+     try{
+       Connection con =Jsoup.connect(url);
+       Document doc=con.get();
+       if(con.response().statusCode()== 200){
+          return doc;
+       }
+       return null;
+     }
+     catch(IOException e){
+         return null;
+      }
+ 
+    }
+}
